@@ -6,8 +6,8 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 #
-# GLFW options
-#
+# GLFW options (Builds GLFW)
+# 
 option (GLFW_INSTALL OFF)
 option (GLFW_BUILD_DOCS OFF)
 option (GLFW_BUILD_EXAMPLES OFF)
@@ -38,5 +38,4 @@ set_target_properties(${MAIN_TARGET} PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAK
 
 target_include_directories(${MAIN_TARGET} PUBLIC "include" "external/glfw/include")
 
-#target_link_directories(${MAIN_TARGET} PUBLIC "libs")
 target_link_libraries(${MAIN_TARGET} glfw ${LIBS} OpenGL::OpenGL)
