@@ -2,7 +2,7 @@
 #include <string>
 
 
-#include <glad/glad.h>
+#include <glad/glad.h> // glad before glfw
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -11,8 +11,10 @@
 #include <imgui_impl_opengl3.h>
 #include <stb_image.h>
 
-void framebuffer_size_callback(GLFWwindow* window, int width, int height);
-void processInput(GLFWwindow *window);
+#include "Callbacks.h"
+#include "Constants.h"
+#include "DebugUtils.h"
+#include "PathConfig.h" // for RESOURCES_DIR
 
 // settings
 const unsigned int SCR_WIDTH = 800;
@@ -22,14 +24,14 @@ int main()
 {
     // glfw: initialize and configure
     // ------------------------------
-    glfwInit();
+    if (!glfwInit()) 
+    {
+        std::cerr << "Failed to initialize GLFW" << std::endl;
+        return -1;
+    }
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
-#ifdef __APPLE__
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-#endif
 
     // glfw window creation
     // --------------------
@@ -41,7 +43,17 @@ int main()
         return -1;
     }
     glfwMakeContextCurrent(window);
-    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+
+    // tell stb_image.h to flip loaded texture's on the y-axis (before loading model).
+    // stbi_set_flip_vertically_on_load(true);
+    // ----------------- //
+    //     CALLBACKS     //
+    // ----------------- // 
+    glfwSetFramebufferSizeCallback(window, FramebufferSizeCallback);
+    glfwSetMouseButtonCallback(window, MouseButtonCallback);
+    glfwSetCursorPosCallback(window, MousePosCallback);
+    glfwSetScrollCallback(window, ScrollCallback);
+    glfwSetKeyCallback(window, KeyboardCallback);
 
     // glad: load all OpenGL function pointers
     // ---------------------------------------
@@ -49,7 +61,14 @@ int main()
     {
         std::cout << "Failed to initialize GLAD" << std::endl;
         return -1;
-    }    
+    } 
+
+    // Dear ImGui setup
+    IMGUI_CHECKVERSION(); ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO(); (void)io;
+    ImGui::StyleColorsDark(); 
+    ImGui_ImplGlfw_InitForOpenGL(window, true);
+    ImGui_ImplOpenGL3_Init("#version 330");
 
     // render loop
     // -----------
